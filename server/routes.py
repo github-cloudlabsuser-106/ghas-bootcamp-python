@@ -33,6 +33,8 @@ def index():
 @flaskapp.route("/log_injections")
 def log_injections():
     data = request.args.get("data")
+    if data:
+        data = data.replace('\r\n', '').replace('\n', '')
     logging.debug(data)
     return jsonify(data="Log injection vulnerability"), 200
 
