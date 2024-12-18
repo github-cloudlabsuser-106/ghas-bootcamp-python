@@ -4,7 +4,7 @@ from server.webapp import flaskapp, cursor
 from server.models import Book, User
 import logging
 import subprocess
-
+import os
 
 logging.basicConfig(filename="logs.log", filemode="w", level=logging.DEBUG)
 
@@ -52,10 +52,16 @@ def config():
 @flaskapp.route("/read-bad-file")
 def read_bad_file():
     file = request.args.get("file")
-    with open(file, "r") as f:
-        data = f.read()
-    logging.debug(data)
-    return jsonify(data="Uncontrolled data use in path expression"), 200
+    if file:
+        base_path = '/safe/directory'
+        fullpath = os.path.normpath(os.path.join(base_path, file))
+        if not fullpath.startswith(base_path):
+            return jsonify(data="Invalid file path"), 400
+        with open(fullpath, "r") as f:
+            data = f.read()
+        logging.debug(data)
+        return jsonify(data="File read successfully"), 200
+    return jsonify(data="No file specified"), 400
 
 
 @flaskapp.route("/hello")
